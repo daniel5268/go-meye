@@ -17,7 +17,7 @@ There are three roles:
  - Create a postgres database
  - Rename files ending in .env.example and remove .example.
  - set your different environment variables in the previous step files, DATABASE_URL value is needed in the next step
- - Run "migrate -database "{DATABASE_URL}" -path ./migrations up" (do not include brackets on DATABASE_URL) for each environment, migrations should be run in every environment
+ - Run "migrate -database "{DATABASE_URL}" -path ./migrations up" for each environment, migrations should be run in every environment
  - Run "GO_ENV=production go run ./src/main.go" this command will take environment variables defined in .env, to use environment variables from dev.env, omit GO_ENV=production
 
 When migrations are run, an admin user is inserted with credentials username="admin" secret="league", It's recomended to update the secret with the PUT /api/gomeye/users/{userID} endpoint
