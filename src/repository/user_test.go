@@ -26,7 +26,16 @@ func compareErr(expectedErr, actualErr error) bool {
 	return expectedErr == actualErr
 }
 
-func compareUser(expectedUser, actualUser domain.User) bool {
+func compareUser(expectedUser, actualUser *domain.User) bool {
+	if expectedUser == nil && actualUser != nil {
+		return false
+	}
+	if expectedUser != nil && actualUser == nil {
+		return false
+	}
+	if expectedUser == nil && actualUser == nil {
+		return true
+	}
 	c1 := expectedUser.IsAdmin == actualUser.IsAdmin
 	c2 := expectedUser.IsMaster == actualUser.IsMaster
 	c3 := expectedUser.IsPlayer == actualUser.IsPlayer
@@ -41,19 +50,18 @@ func TestUserRepositoryFindByUserName(t *testing.T) {
 	tests := []struct {
 		name     string
 		username string
-		wantUser domain.User
+		wantUser *domain.User
 		wantErr  error
 	}{
 		{
 			name:     "Should return a not found error when the User doesn't exist",
 			username: "ups",
-			wantUser: domain.User{},
 			wantErr:  domain.NewDomainError(section, domain.CodeUserNotFoundError, gorm.ErrRecordNotFound),
 		},
 		{
 			name:     "Should return the user",
 			username: username,
-			wantUser: domain.User{
+			wantUser: &domain.User{
 				Username:     username,
 				HashedSecret: "$2a$08$ad8/41F7A5qAXJc17A31UeWBKoWiZDJ/323YHUI28pMaCw9BSUSNm",
 				IsAdmin:      true,
@@ -68,6 +76,71 @@ func TestUserRepositoryFindByUserName(t *testing.T) {
 			gotUser, gotErr := r.FindByUsername(tt.username)
 			assert.True(t, compareUser(tt.wantUser, gotUser))
 			assert.True(t, compareErr(tt.wantErr, gotErr))
+		})
+	}
+}
+
+func TestUserRepositoryFindByID(t *testing.T) {
+	section := "UserRepository.FindByID"
+	userID := 1
+	tests := []struct {
+		name     string
+		ID       int
+		wantUser *domain.User
+		wantErr  error
+	}{
+		{
+			name:    "Should return a not found error when the User doesn't exist",
+			ID:      321,
+			wantErr: domain.NewDomainError(section, domain.CodeUserNotFoundError, gorm.ErrRecordNotFound),
+		},
+		{
+			name: "Should return the user",
+			ID:   userID,
+			wantUser: &domain.User{
+				Username:     "admin",
+				HashedSecret: "$2a$08$ad8/41F7A5qAXJc17A31UeWBKoWiZDJ/323YHUI28pMaCw9BSUSNm",
+				IsAdmin:      true,
+			},
+		},
+	}
+	config.LoadConfig(config.Test)
+	db := infrastructure.NewGormPostgresClient()
+	r := repository.NewUserRepository(db)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotUser, gotErr := r.FindByID(tt.ID)
+			assert.True(t, compareUser(tt.wantUser, gotUser))
+			assert.True(t, compareErr(tt.wantErr, gotErr))
+		})
+	}
+}
+
+func TestUserRepositoryUpdate(t *testing.T) {
+	tests := []struct {
+		name    string
+		updates map[string]interface{}
+		user    *domain.User
+		wantErr error
+	}{
+		{
+			name: "Updates correctly",
+			updates: map[string]interface{}{
+				"is_admin": true,
+			},
+			user: &domain.User{
+				ID: 1,
+			},
+			wantErr: nil,
+		},
+	}
+	config.LoadConfig(config.Test)
+	db := infrastructure.NewGormPostgresClient()
+	r := repository.NewUserRepository(db)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotErr := r.Update(tt.updates, tt.user)
+			assert.Equal(t, tt.wantErr, gotErr)
 		})
 	}
 }

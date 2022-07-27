@@ -4,12 +4,12 @@ import (
 	"time"
 
 	"github.com/daniel5268/go-meye/src/config"
+	"github.com/daniel5268/go-meye/src/util"
 	"github.com/golang-jwt/jwt"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	ID           int64     `json:"id"`
+	ID           int       `json:"id"`
 	Username     string    `json:"username"`
 	HashedSecret string    `json:"-"`
 	IsAdmin      bool      `json:"is_admin"`
@@ -20,23 +20,18 @@ type User struct {
 }
 
 type TokenClaims struct {
-	ID       int64  `json:"id"`
+	ID       int    `json:"id"`
 	Username string `json:"username"`
 	jwt.StandardClaims
 }
 
-func hashString(s string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(s), 8)
-	return string(bytes), err
-}
-
-func NewUser(username, secret string, isAdmin, isMaster, isPlayer bool) (User, error) {
+func NewUser(username, secret string, isAdmin, isMaster, isPlayer bool) (*User, error) {
 	section := "NewUser"
-	hashedSecret, err := hashString(secret)
+	hashedSecret, err := util.HashSecret(secret)
 	if err != nil {
-		return User{}, NewDomainError(section, CodeHashError, err)
+		return nil, NewDomainError(section, CodeHashError, err)
 	}
-	return User{
+	return &User{
 		Username:     username,
 		IsAdmin:      isAdmin,
 		IsMaster:     isMaster,
@@ -66,6 +61,5 @@ func (u User) GetToken() (string, error) {
 }
 
 func (u User) ValidateSecret(secret string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(u.HashedSecret), []byte(secret))
-	return err == nil
+	return util.CompareHashAndSecret(u.HashedSecret, secret)
 }

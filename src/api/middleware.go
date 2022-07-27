@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/daniel5268/go-meye/src/config"
 	"github.com/daniel5268/go-meye/src/domain"
@@ -14,21 +15,26 @@ const tokenHeader = "Authorization"
 var errForbidden = errors.New("Forbidden")
 
 type UserRepository interface {
-	FindByUsername(username string) (domain.User, error)
+	FindByID(userID int) (*domain.User, error)
 }
 
-func AuthAdmin(repository UserRepository) echo.MiddlewareFunc {
+func AuthAdmin(ur UserRepository) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			section := "middleware.AuthAdmin"
 			errForbidden := domain.NewDomainError(section, domain.CodeForbiddenError, errForbidden)
-			tokenString := c.Request().Header.Get(tokenHeader)
-			if tokenString == "" {
+			authorization := c.Request().Header.Get(tokenHeader)
+			if authorization == "" {
 				return errForbidden
 			}
+			authSplit := strings.Split(authorization, "Bearer ")
+			if len(authSplit) != 2 {
+				return errForbidden
+			}
+			tokenString := authSplit[1]
 
-			claims := &domain.TokenClaims{}
-			token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+			claims := domain.TokenClaims{}
+			token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
 				return []byte(config.JwtSecret), nil
 			})
 
@@ -36,7 +42,7 @@ func AuthAdmin(repository UserRepository) echo.MiddlewareFunc {
 				return errForbidden
 			}
 
-			user, err := repository.FindByUsername(claims.Username)
+			user, err := ur.FindByID(claims.ID)
 			if err != nil || !user.IsAdmin {
 				return errForbidden
 			}

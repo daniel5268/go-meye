@@ -19,8 +19,8 @@ import (
 const apiName = "gomeye"
 
 type userDependencies struct {
-	handler    handler.UserHandler
-	repository repository.UserRepository
+	handler    *handler.UserHandler
+	repository *repository.UserRepository
 }
 
 type dependencies struct {
