@@ -15,6 +15,7 @@ const (
 	CodeRepositoryError         = "repository_error"
 	CodeHashError               = "hash_error"
 	CodeForbiddenError          = "forbidden_error"
+	CodeUserAlreadyCreatedError = "user_already_created_error"
 )
 
 func (e *DomainError) Error() string {

@@ -18,6 +18,7 @@ const (
 	CodeNotFound        = "not_found"
 	CodeRepositoryError = "repository_error"
 	CodeForbiddenError  = "forbidden"
+	CodeHashError       = "hash_error"
 )
 
 // APIError structure that represents an API error
@@ -67,6 +68,10 @@ func mapToAPIError(err error) APIError {
 		return NewAPIError(http.StatusInternalServerError, CodeRepositoryError, internalError)
 	case domain.CodeForbiddenError:
 		return NewAPIError(http.StatusForbidden, CodeForbiddenError, "Forbidden")
+	case domain.CodeUserAlreadyCreatedError:
+		return NewAPIError(http.StatusBadRequest, CodeBadRequest, "User already created")
+	case domain.CodeHashError:
+		return NewAPIError(http.StatusInternalServerError, CodeHashError, internalError)
 	default:
 		return NewAPIError(http.StatusInternalServerError, CodeInternalError, internalError)
 	}

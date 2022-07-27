@@ -42,16 +42,16 @@ func TestUserHandlerSignIn(t *testing.T) {
 		wantErr error
 	}{
 		{
-			name:    "returns a domain error with code = CodeBindError when there is an unexpected type",
+			name:    "Returns an error when binding fails",
 			body:    []byte(`{"username":50,"secret":"secret"}`),
 			wantErr: domain.NewDomainError(section, domain.CodeBindError, errTest),
 		},
 		{
-			name:    "returns a domain error when validations fail",
+			name:    "Returns an error when validations fail",
 			wantErr: domain.NewDomainError(section, domain.CodeValidationError, errTest),
 		},
 		{
-			name:    "returns an error when the service fails",
+			name:    "Returns an error when the service fails",
 			wantErr: errTest,
 			body:    []byte(`{"username":"myUsername","secret":"mySecret"}`),
 			service: func() handler.UserService {
@@ -83,5 +83,4 @@ func TestUserHandlerSignIn(t *testing.T) {
 			assert.True(t, compareErr(tt.wantErr, gotErr))
 		})
 	}
-
 }

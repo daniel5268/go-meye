@@ -27,6 +27,20 @@ func (_m *UserService) Create(user *domain.User) error {
 	return r0
 }
 
+// Delete provides a mock function with given fields: userID
+func (_m *UserService) Delete(userID int) error {
+	ret := _m.Called(userID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int) error); ok {
+		r0 = rf(userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetToken provides a mock function with given fields: username, secret
 func (_m *UserService) GetToken(username string, secret string) (string, error) {
 	ret := _m.Called(username, secret)
@@ -41,6 +55,29 @@ func (_m *UserService) GetToken(username string, secret string) (string, error) 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string) error); ok {
 		r1 = rf(username, secret)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Update provides a mock function with given fields: userID, updates
+func (_m *UserService) Update(userID int, updates map[string]interface{}) (*domain.User, error) {
+	ret := _m.Called(userID, updates)
+
+	var r0 *domain.User
+	if rf, ok := ret.Get(0).(func(int, map[string]interface{}) *domain.User); ok {
+		r0 = rf(userID, updates)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.User)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int, map[string]interface{}) error); ok {
+		r1 = rf(userID, updates)
 	} else {
 		r1 = ret.Error(1)
 	}
