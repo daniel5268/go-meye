@@ -15,4 +15,5 @@ func (a *App) setupRoutes(g *echo.Group) {
 	v1UserGroup.POST("/token", userHandler.SignIn)
 	v1UserGroup.POST("", userHandler.Create, AuthAdmin(userRepository))
 	v1UserGroup.PATCH("/:userID", userHandler.Update, AuthAdmin(userRepository))
+	v1UserGroup.DELETE("/:userID", userHandler.Delete, AuthAdmin(userRepository))
 }

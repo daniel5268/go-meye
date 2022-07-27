@@ -27,6 +27,20 @@ func (_m *UserService) Create(user *domain.User) error {
 	return r0
 }
 
+// Delete provides a mock function with given fields: userID
+func (_m *UserService) Delete(userID int) error {
+	ret := _m.Called(userID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int) error); ok {
+		r0 = rf(userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetToken provides a mock function with given fields: username, secret
 func (_m *UserService) GetToken(username string, secret string) (string, error) {
 	ret := _m.Called(username, secret)

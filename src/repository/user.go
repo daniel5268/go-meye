@@ -36,14 +36,14 @@ func (r *UserRepository) FindByUsername(username string) (*domain.User, error) {
 func (r *UserRepository) FindByID(ID int) (*domain.User, error) {
 	section := "UserRepository.FindByID"
 	u := domain.User{}
-	result := r.db.First(&u, "id = ?", ID)
+	err := r.db.First(&u, "id = ?", ID).Error
 
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, domain.NewDomainError(section, domain.CodeUserNotFoundError, result.Error)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, domain.NewDomainError(section, domain.CodeUserNotFoundError, err)
 	}
 
-	if result.Error != nil {
-		return nil, domain.NewDomainError(section, domain.CodeRepositoryError, result.Error)
+	if err != nil {
+		return nil, domain.NewDomainError(section, domain.CodeRepositoryError, err)
 	}
 
 	return &u, nil
@@ -62,6 +62,16 @@ func (r *UserRepository) Create(u ...*domain.User) error {
 func (r *UserRepository) Update(updates map[string]interface{}, u ...*domain.User) error {
 	section := "UserRepository.Update"
 	err := r.db.Model(u).Updates(updates).Error
+	if err != nil {
+		return domain.NewDomainError(section, domain.CodeRepositoryError, err)
+	}
+
+	return nil
+}
+
+func (r *UserRepository) Delete(userID int) error {
+	section := "UserRepository.Delete"
+	err := r.db.Delete(&domain.User{}, userID).Error
 	if err != nil {
 		return domain.NewDomainError(section, domain.CodeRepositoryError, err)
 	}

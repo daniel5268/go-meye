@@ -54,12 +54,12 @@ func TestUserRepositoryFindByUserName(t *testing.T) {
 		wantErr  error
 	}{
 		{
-			name:     "Should return a not found error when the User doesn't exist",
+			name:     "Returns a not found error when the User doesn't exist",
 			username: "ups",
 			wantErr:  domain.NewDomainError(section, domain.CodeUserNotFoundError, gorm.ErrRecordNotFound),
 		},
 		{
-			name:     "Should return the user",
+			name:     "Returns the user",
 			username: username,
 			wantUser: &domain.User{
 				Username:     username,
@@ -90,12 +90,12 @@ func TestUserRepositoryFindByID(t *testing.T) {
 		wantErr  error
 	}{
 		{
-			name:    "Should return a not found error when the User doesn't exist",
+			name:    "Returns a not found error when the User doesn't exist",
 			ID:      321,
 			wantErr: domain.NewDomainError(section, domain.CodeUserNotFoundError, gorm.ErrRecordNotFound),
 		},
 		{
-			name: "Should return the user",
+			name: "Returns the user",
 			ID:   userID,
 			wantUser: &domain.User{
 				Username:     "admin",
@@ -140,6 +140,30 @@ func TestUserRepositoryUpdate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotErr := r.Update(tt.updates, tt.user)
+			assert.Equal(t, tt.wantErr, gotErr)
+		})
+	}
+}
+
+func TestUserRepositoryDelete(t *testing.T) {
+	tests := []struct {
+		name    string
+		userID  int
+		wantErr error
+	}{
+		{
+			name:    "Deletes the user",
+			userID:  123,
+			wantErr: nil,
+		},
+	}
+	config.LoadConfig(config.Test)
+	db := infrastructure.NewGormPostgresClient()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := repository.NewUserRepository(db)
+			gotErr := r.Delete(tt.userID)
 			assert.Equal(t, tt.wantErr, gotErr)
 		})
 	}

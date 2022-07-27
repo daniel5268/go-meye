@@ -20,6 +20,7 @@ type UserService interface {
 	GetToken(username string, secret string) (string, error)
 	Create(user *domain.User) error
 	Update(userID int, updates map[string]interface{}) (*domain.User, error)
+	Delete(userID int) error
 }
 
 type UserHandler struct {
@@ -106,6 +107,20 @@ func (h UserHandler) Update(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, updated)
+}
+
+func (h *UserHandler) Delete(c echo.Context) error {
+	section := "UserHandler.Delete"
+	userID, err := intParam(c, userIDParameter)
+	if err != nil {
+		return domain.NewDomainError(section, domain.CodeValidationError, errors.New("userID should be integer"))
+	}
+	err = h.userService.Delete(userID)
+	if err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }
 
 func intParam(c echo.Context, parameter string) (int, error) {

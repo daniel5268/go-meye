@@ -31,7 +31,6 @@ type APIError struct {
 // ErrorHandler manages errors on application level
 func ErrorHandler(err error, c echo.Context) {
 	c.Logger().Error(err)
-	c.Logger().Error(err.Error())
 	aErr := mapToAPIError(err)
 	_ = c.JSON(aErr.Status, aErr)
 }

@@ -19,6 +19,7 @@ type UserRepository interface {
 	FindByID(ID int) (*domain.User, error)
 	Create(u ...*domain.User) error
 	Update(updates map[string]interface{}, u ...*domain.User) error
+	Delete(userID int) error
 }
 
 func NewUserService(ur UserRepository) *UserService {
@@ -65,4 +66,8 @@ func (us *UserService) Update(userID int, updates map[string]interface{}) (*doma
 	err = us.userRepository.Update(updates, u)
 
 	return u, err
+}
+
+func (us *UserService) Delete(userID int) error {
+	return us.userRepository.Delete(userID)
 }

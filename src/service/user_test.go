@@ -173,3 +173,31 @@ func TestUserServiceUpdate(t *testing.T) {
 		})
 	}
 }
+
+func TestUserServiceDelete(t *testing.T) {
+	errTest := errors.New("test_error")
+	userID := 1
+	tests := []struct {
+		name       string
+		repository service.UserRepository
+		wantErr    error
+	}{
+		{
+			name: "Returns the repository error",
+			repository: func() service.UserRepository {
+				repositoryMock := &mocks.UserRepository{}
+				repositoryMock.On("Delete", userID).Return(errTest)
+				return repositoryMock
+			}(),
+			wantErr: errTest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := service.NewUserService(tt.repository)
+			gotErr := s.Delete(userID)
+			assert.Equal(t, tt.wantErr, gotErr)
+		})
+	}
+}
